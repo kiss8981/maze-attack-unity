@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class MazeController : MonoBehaviour
 {
-    public MazeGenerator mazeGenerator;
+    // public MazeGenerator mazeGenerator;
 
     void Start()
     {

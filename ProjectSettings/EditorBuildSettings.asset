@@ -12,6 +12,9 @@ EditorBuildSettings:
     path: Assets/Scenes/SelectLevel.unity
     guid: 2f7f3ce63371630438b047c410cc26a1
   - enabled: 1
+    path: Assets/Scenes/Loading.unity
+    guid: c2b30f27740829b4e83c2c5d11428292
+  - enabled: 1
     path: Assets/Scenes/Maze.unity
     guid: 74ef4598da3a36d4f9141b8ca89e9394
   - enabled: 0

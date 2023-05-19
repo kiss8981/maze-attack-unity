@@ -1,175 +1,340 @@
-using UnityEngine;
+// MIT License
+//
+// Copyright (c) 2021 cocodding0723
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
-public class MazeGenerator : MonoBehaviour
+namespace Maze
 {
-    public int mazeWidth;
-    public int mazeHeight;
-    public GameObject wallPrefab;
-    public GameObject startPrefab;
-    public GameObject endPrefab;
-    public GameObject outerWallPrefab;
-    public float wallSize = 1f;
-    public float delay = 0.1f; // 각 스텝의 시간 지연
-
-    private int[,] maze;
-    private Vector2Int startCell;
-    private Vector2Int endCell;
-
-    void Start()
+    public class MazeGenerator : MonoBehaviour
     {
-        StartCoroutine(GenerateMazeCoroutine());
-    }
+        public Vector2Int mazeSize = new Vector2Int(25, 25);
 
-    IEnumerator GenerateMazeCoroutine()
-    {
-        // 초기화
-        maze = new int[mazeHeight, mazeWidth];
+        private Vector2Int BlockSize => mazeSize / 2;
 
-        // 외벽 생성
-        for (int y = 0; y < mazeHeight; y++)
+        private Block[,] _blocks;
+        private bool[,] _existWalls;
+        private DisjointSet _disjointSet;
+        private readonly Dictionary<int, List<int>> _lastRowBlocks = new Dictionary<int, List<int>>();
+
+        [SerializeField] private float delayCreateTime = 0.25f;
+        [SerializeField] private bool isDelayCreate;
+        [SerializeField] private bool isDrawGizmo;
+
+        [SerializeField] private GameObject wallPrefab;
+
+        private void Awake()
         {
-            maze[y, 0] = -1;
-            maze[y, mazeWidth - 1] = -1;
+            var size = BlockSize;
+            var disjointSetSize = BlockSize.x * BlockSize.y;
+
+            _blocks = new Block[size.x, size.y];
+            _existWalls = new bool[mazeSize.x, mazeSize.y];
+            _disjointSet = new DisjointSet(disjointSetSize);
         }
 
-        for (int x = 0; x < mazeWidth; x++)
+        private void Start()
         {
-            maze[0, x] = -1;
-            maze[mazeHeight - 1, x] = -1;
-        }
+            InitBlocks();
 
-        // 시작 지점 설정
-        startCell = new Vector2Int(Random.Range(1, mazeWidth - 2), Random.Range(1, mazeHeight - 2));
-        maze[startCell.y, startCell.x] = 2;
-
-        // DFS 알고리즘을 사용하여 미로 생성
-        Stack<Vector2Int> stack = new Stack<Vector2Int>();
-        stack.Push(startCell);
-
-        while (stack.Count > 0)
-        {
-            Vector2Int currentCell = stack.Pop();
-
-            List<Vector2Int> neighbors = GetUnvisitedNeighbors(currentCell);
-
-            if (neighbors.Count > 0)
+            if (isDelayCreate && isDrawGizmo)
             {
-                stack.Push(currentCell);
-
-                int randomIndex = Random.Range(0, neighbors.Count);
-                Vector2Int randomNeighbor = neighbors[randomIndex];
-
-                maze[randomNeighbor.y, randomNeighbor.x] = 1;
-                maze[
-                    (currentCell.y + randomNeighbor.y) / 2,
-                    (currentCell.x + randomNeighbor.x) / 2
-                ] = 1;
-
-                stack.Push(randomNeighbor);
-
-                yield return new WaitForSeconds(delay); // 시간 지연
+                StartCoroutine(DelayCreateMaze());
             }
-        }
-
-        // 끝나는 지점 설정
-        endCell = GetFarthestCellFromStart();
-        maze[endCell.y, endCell.x] = 3;
-
-        DrawMaze();
-    }
-
-    List<Vector2Int> GetUnvisitedNeighbors(Vector2Int cell)
-    {
-        List<Vector2Int> neighbors = new List<Vector2Int>();
-
-        Vector2Int[] offsets = new Vector2Int[]
-        {
-            Vector2Int.up * 2,
-            Vector2Int.down * 2,
-            Vector2Int.left * 2,
-            Vector2Int.right * 2
-        };
-
-        foreach (var offset in offsets)
-        {
-            Vector2Int neighbor = cell + offset;
-
-            if (IsValidCell(neighbor) && maze[neighbor.y, neighbor.x] == 0)
+            else
             {
-                neighbors.Add(neighbor);
-            }
-        }
-
-        return neighbors;
-    }
-
-    bool IsValidCell(Vector2Int cell)
-    {
-        return cell.x >= 0 && cell.x < mazeWidth && cell.y >= 0 && cell.y < mazeHeight;
-    }
-
-    Vector2Int GetFarthestCellFromStart()
-    {
-        Vector2Int farthestCell = Vector2Int.zero;
-        int maxDistance = 0;
-
-        for (int y = 0; y < mazeHeight; y++)
-        {
-            for (int x = 0; x < mazeWidth; x++)
-            {
-                if (maze[y, x] == 0)
+                for (int y = 0; y < BlockSize.y - 1; y++)
                 {
-                    Vector2Int currentCell = new Vector2Int(x, y);
-                    int distance =
-                        Mathf.Abs(currentCell.x - startCell.x)
-                        + Mathf.Abs(currentCell.y - startCell.y);
+                    RandomMergeRowBlocks(y);
+                    DropDownGroups(y);
+                }
 
-                    if (distance > maxDistance)
+                OrganizeLastLine();
+                MakeHoleInPath();
+
+                if (!isDrawGizmo)
+                {
+                    BuildWalls();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 블럭을 초기화 하는 함수.
+        /// A function that initializes blocks.
+        /// </summary>
+        private void InitBlocks()
+        {
+            for (int x = 0; x < BlockSize.x; x++)
+            {
+                for (int y = 0; y < BlockSize.y; y++)
+                {
+                    _blocks[x, y] = new Block();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 행의 블럭을 순차적으로 접근하면서 선택한 블럭과 오른쪽 블럭을 랜덤하게 합치는 함수.
+        /// A function of randomly merge the selected block and the right block while sequentially approaching the blocks of the row.
+        /// </summary>
+        /// <param name="row">현재 행 (current row)</param>
+        private void RandomMergeRowBlocks(int row)
+        {
+            for (int x = 0; x < BlockSize.x - 1; x++)
+            {
+                var canMerge = Random.Range(0, 2) == 1;
+                var currentBlockNumber = _blocks[x, row].BlockNumber;
+                var nextBlockNumber = _blocks[x + 1, row].BlockNumber;
+
+                if (canMerge && !_disjointSet.IsUnion(currentBlockNumber, nextBlockNumber))
+                {
+                    _disjointSet.Merge(currentBlockNumber, nextBlockNumber);
+                    _blocks[x, row].OpenWay[(int)Direction.Right] = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 현재 행에서 가지를 내리는 함수
+        /// A function of branching off the current row.
+        /// </summary>
+        /// <param name="row">현재 행 (current row)</param>
+        private void DropDownGroups(int row)
+        {
+            _lastRowBlocks.Clear();
+
+            for (int x = 0; x < BlockSize.x; x++)
+            {
+                var blockNumber = _blocks[x, row].BlockNumber;
+                var parentNumber = _disjointSet.Find(_blocks[x, row].BlockNumber);
+
+                if (!_lastRowBlocks.ContainsKey(parentNumber))
+                {
+                    _lastRowBlocks.Add(parentNumber, new List<int>());
+                }
+
+                _lastRowBlocks[parentNumber].Add(blockNumber);
+            }
+
+            foreach (var group in _lastRowBlocks)
+            {
+                if (group.Value.Count == 0) continue;
+
+                var randomDownCount = Random.Range(1, group.Value.Count);
+
+                for (int i = 0; i < randomDownCount; i++)
+                {
+                    var randomBlockIndex = Random.Range(0, group.Value.Count);
+
+                    var currentBlockNumber = group.Value[randomBlockIndex];
+                    var currentBlockPosition = Block.GetPosition(currentBlockNumber, BlockSize);
+
+                    var currentBlock = _blocks[currentBlockPosition.x, currentBlockPosition.y];
+                    var underBlock = _blocks[currentBlockPosition.x, currentBlockPosition.y + 1];
+
+                    _disjointSet.Merge(currentBlock.BlockNumber, underBlock.BlockNumber);
+                    currentBlock.OpenWay[(int)Direction.Down] = true;
+
+                    group.Value.RemoveAt(randomBlockIndex);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 마지막 줄을 정리하는 함수
+        /// A function that organizes the last line.
+        /// </summary>
+        private void OrganizeLastLine()
+        {
+            var lastRow = BlockSize.y - 1;
+
+            for (int x = 0; x < BlockSize.x - 1; x++)
+            {
+                var currentBlock = _blocks[x, lastRow];
+                var nextBlock = _blocks[x + 1, lastRow];
+
+                if (!_disjointSet.IsUnion(currentBlock.BlockNumber, nextBlock.BlockNumber))
+                {
+                    currentBlock.OpenWay[(int)Direction.Right] = true;
+                }
+            }
+        }
+
+        private IEnumerator DelayCreateMaze()
+        {
+            for (int y = 0; y < BlockSize.y - 1; y++)
+            {
+                yield return StartCoroutine(DelayRandomMergeBlocks(y));
+                yield return StartCoroutine(DelayDropDownGroups(y));
+
+                MakeHoleInPath();
+
+                yield return new WaitForSeconds(delayCreateTime);
+            }
+
+            yield return new WaitForSeconds(delayCreateTime);
+
+            yield return StartCoroutine(DelayCleanUpLastLine());
+            MakeHoleInPath();
+        }
+
+        private IEnumerator DelayRandomMergeBlocks(int row)
+        {
+            for (int x = 0; x < BlockSize.x - 1; x++)
+            {
+                var canMerge = Random.Range(0, 2) == 1;
+                var currentBlockNumber = _blocks[x, row].BlockNumber;
+                var nextBlockNumber = _blocks[x + 1, row].BlockNumber;
+
+                if (canMerge && !_disjointSet.IsUnion(currentBlockNumber, nextBlockNumber))
+                {
+                    _disjointSet.Merge(currentBlockNumber, nextBlockNumber);
+                    _blocks[x, row].OpenWay[(int)Direction.Right] = true;
+                }
+
+                MakeHoleInPath();
+
+                yield return new WaitForSeconds(delayCreateTime);
+            }
+        }
+
+        private IEnumerator DelayDropDownGroups(int row)
+        {
+            _lastRowBlocks.Clear();
+
+            for (int x = 0; x < BlockSize.x; x++)
+            {
+                var blockNumber = _blocks[x, row].BlockNumber;
+                var parentNumber = _disjointSet.Find(_blocks[x, row].BlockNumber);
+
+                if (!_lastRowBlocks.ContainsKey(parentNumber))
+                {
+                    _lastRowBlocks.Add(parentNumber, new List<int>());
+                }
+
+                _lastRowBlocks[parentNumber].Add(blockNumber);
+            }
+
+            foreach (var group in _lastRowBlocks)
+            {
+                if (group.Value.Count == 0) continue;
+
+                var randomDownCount = Random.Range(1, group.Value.Count);
+
+                for (int i = 0; i < randomDownCount; i++)
+                {
+                    var randomBlockIndex = Random.Range(0, group.Value.Count);
+
+                    var currentBlockNumber = group.Value[randomBlockIndex];
+                    var currentBlockPosition = Block.GetPosition(currentBlockNumber, BlockSize);
+
+                    var currentBlock = _blocks[currentBlockPosition.x, currentBlockPosition.y];
+                    var underBlock = _blocks[currentBlockPosition.x, currentBlockPosition.y + 1];
+
+                    _disjointSet.Merge(currentBlock.BlockNumber, underBlock.BlockNumber);
+                    currentBlock.OpenWay[(int)Direction.Down] = true;
+
+                    group.Value.RemoveAt(randomBlockIndex);
+
+                    MakeHoleInPath();
+
+                    yield return new WaitForSeconds(delayCreateTime);
+                }
+            }
+        }
+
+        private IEnumerator DelayCleanUpLastLine()
+        {
+            var lastRow = BlockSize.y - 1;
+
+            for (int x = 0; x < BlockSize.x - 1; x++)
+            {
+                var currentBlock = _blocks[x, lastRow];
+                var nextBlock = _blocks[x + 1, lastRow];
+
+                if (!_disjointSet.IsUnion(currentBlock.BlockNumber, nextBlock.BlockNumber))
+                {
+                    currentBlock.OpenWay[(int)Direction.Right] = true;
+                }
+
+                MakeHoleInPath();
+
+                yield return new WaitForSeconds(delayCreateTime);
+            }
+        }
+
+        private void MakeHoleInPath()
+        {
+            for (int x = 0; x < BlockSize.x; x++)
+            {
+                for (int y = 0; y < BlockSize.y; y++)
+                {
+                    var adjustPosition = new Vector2Int(x * 2 + 1, y * 2 + 1);
+                    _existWalls[adjustPosition.x, adjustPosition.y] = true;
+
+                    if (_blocks[x, y].OpenWay[(int)Direction.Down])
+                        _existWalls[adjustPosition.x, adjustPosition.y + 1] = true;
+                    if (_blocks[x, y].OpenWay[(int)Direction.Right])
+                        _existWalls[adjustPosition.x + 1, adjustPosition.y] = true;
+                }
+            }
+        }
+
+        private void BuildWalls()
+        {
+            for (int x = 0; x < mazeSize.x; x++)
+            {
+                for (int y = 0; y < mazeSize.y; y++)
+                {
+                    if (_existWalls[x, y]) continue;
+
+                    var myTransform = transform;
+                    var mazeHalfSize = new Vector3(mazeSize.x, mazeSize.y, 0) / 2;
+                    var wallPosition = new Vector3(x, y, 0) - mazeHalfSize + myTransform.position;
+
+                    Instantiate(wallPrefab, wallPosition, Quaternion.identity, myTransform);
+                }
+            }
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (Application.isPlaying && isDrawGizmo)
+            {
+                Gizmos.color = Color.red;
+
+                for (int x = 0; x < mazeSize.x; x++)
+                {
+                    for (int y = 0; y < mazeSize.y; y++)
                     {
-                        maxDistance = distance;
-                        farthestCell = currentCell;
+                        if (!_existWalls[x, y])
+                        {
+                            var mazeHalfSize = new Vector3(mazeSize.x, mazeSize.y, 0) / 2;
+                            var wallPosition = new Vector3(x, y, 0) - mazeHalfSize + transform.position;
+                            Gizmos.DrawCube(wallPosition, Vector3.one);
+                        }
                     }
-                }
-            }
-        }
-
-        return farthestCell;
-    }
-
-    void DrawMaze()
-    {
-        // 기존의 미로 오브젝트 삭제
-        foreach (Transform child in transform)
-        {
-            Destroy(child.gameObject);
-        }
-
-        // 새로운 미로 생성
-        for (int y = 0; y < mazeHeight; y++)
-        {
-            for (int x = 0; x < mazeWidth; x++)
-            {
-                if (maze[y, x] == 1)
-                {
-                    Vector3 position = new Vector3(x * wallSize, y * wallSize, 0f);
-                    Instantiate(wallPrefab, position, Quaternion.identity, transform);
-                }
-                else if (maze[y, x] == 2)
-                {
-                    Vector3 position = new Vector3(x * wallSize, y * wallSize, 0f);
-                    Instantiate(startPrefab, position, Quaternion.identity, transform);
-                }
-                else if (maze[y, x] == 3)
-                {
-                    Vector3 position = new Vector3(x * wallSize, y * wallSize, 0f);
-                    Instantiate(endPrefab, position, Quaternion.identity, transform);
-                }
-                else if (maze[y, x] == -1)
-                {
-                    Vector3 position = new Vector3(x * wallSize, y * wallSize, 0f);
-                    Instantiate(outerWallPrefab, position, Quaternion.identity, transform);
                 }
             }
         }

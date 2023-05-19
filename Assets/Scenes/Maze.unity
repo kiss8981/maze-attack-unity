@@ -236,7 +236,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30a0e71426183e9438daf6ebf1daa94e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mazeGenerator: {fileID: 2092686293}
 --- !u!4 &1845929819
 Transform:
   m_ObjectHideFlags: 0
@@ -261,7 +260,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2092686294}
-  - component: {fileID: 2092686293}
+  - component: {fileID: 2092686295}
   m_Layer: 0
   m_Name: MazeGenerator
   m_TagString: Untagged
@@ -269,27 +268,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2092686293
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2092686292}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f22d72b46ba705d4dbaa1055ba8e31c3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mazeWidth: 50
-  mazeHeight: 60
-  wallPrefab: {fileID: 164708, guid: 5b9bdbfaa9cc84a8daef7fb586b5242a, type: 3}
-  startPrefab: {fileID: 1410095254585992, guid: 17ee111609abcb042a718439d3735d11,
-    type: 3}
-  endPrefab: {fileID: 1009014215715918, guid: 65584b61f817f5c4e83ff89f7d9540e8, type: 3}
-  outerWallPrefab: {fileID: 164708, guid: 5b9bdbfaa9cc84a8daef7fb586b5242a, type: 3}
-  wallSize: 1
-  delay: 0.01
 --- !u!4 &2092686294
 Transform:
   m_ObjectHideFlags: 0
@@ -305,3 +283,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2092686295
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2092686292}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f22d72b46ba705d4dbaa1055ba8e31c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mazeSize: {x: 25, y: 25}
+  delayCreateTime: 0.1
+  isDelayCreate: 0
+  isDrawGizmo: 0
+  wallPrefab: {fileID: 164708, guid: 5b9bdbfaa9cc84a8daef7fb586b5242a, type: 3}
