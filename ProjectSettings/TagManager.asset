@@ -4,11 +4,11 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Player2
   - Enemy
   - Bullet
   - Ground
   - Pickup
+  - Loading
   layers:
   - Default
   - TransparentFX

@@ -1,8 +1,5 @@
-namespace Maze
+public enum Direction : sbyte
 {
-    public enum Direction : sbyte
-    {
-        Down = 0,
-        Right,
-    }
+    Down = 0,
+    Right,
 }

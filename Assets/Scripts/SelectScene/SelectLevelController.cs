@@ -46,6 +46,6 @@ public class SelectLevelController : MonoBehaviour
     public void OnClickLevelButton(int btnNum)
     {
         PlayerPrefs.SetInt("Level", (currentPage - 1) * 3 + btnNum);
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Loading");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Maze");
     }
 }

@@ -7,19 +7,16 @@ EditorBuildSettings:
   m_Scenes:
   - enabled: 1
     path: Assets/Scenes/Main.unity
-    guid: 2cda990e2423bbf4892e6590ba056729
+    guid: b394b4570d4c77b448cc976bdf289679
   - enabled: 1
     path: Assets/Scenes/SelectLevel.unity
     guid: 2f7f3ce63371630438b047c410cc26a1
   - enabled: 1
-    path: Assets/Scenes/Loading.unity
-    guid: c2b30f27740829b4e83c2c5d11428292
-  - enabled: 1
     path: Assets/Scenes/Maze.unity
     guid: 74ef4598da3a36d4f9141b8ca89e9394
-  - enabled: 0
-    path: Assets/EasyMainMenu/Scenes/MainMenu.unity
-    guid: c09f4b0b2a9226946aa44a3dd8ffdfa6
+  - enabled: 1
+    path: Assets/Scenes/Loading.unity
+    guid: 2cda990e2423bbf4892e6590ba056729
   - enabled: 0
     path: Assets/Scenes/MazeLevel0.unity
     guid: 029e597475c3944a5b42678232c2822b
