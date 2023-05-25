@@ -13,10 +13,8 @@ public class MazeController : MonoBehaviour
 
     private void MazeGenerate()
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Loading", UnityEngine.SceneManagement.LoadSceneMode.Additive);
         GenerateMaze();
         SetPlayerPosition();
-        UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync("Loading");
     }
 
     private void GenerateMaze()
@@ -25,13 +23,15 @@ public class MazeController : MonoBehaviour
         int width = (level * 2) + 11 % 2 == 0 ? (level * 2) + 10 : (level * 2) + 11;
         int height = (level * 2) + 11 % 2 == 0 ? (level * 2) + 10 : (level * 2) + 11;
         mazeGenerator.MazeGenerate(width, height);
+        SetPlayerPosition();
     }
 
     void SetPlayerPosition()
     {
         var player = GameObject.FindGameObjectWithTag("Player");
-        var startBlockNumber = mazeGenerator.GetStartBlockNumber();
-        var startPosition = Block.GetPosition(startBlockNumber, mazeGenerator.mazeSize);
-        player.transform.position = new Vector3(startPosition.x, 0.5f, startPosition.y);
+        Block startBlock = mazeGenerator.GetStartBlockNumber();
+        Vector3 mazePosition = mazeGenerator.transform.position;
+
+        player.transform.position = startBlock.GetPosition(mazePosition, mazeGenerator.mazeSize);
     }
 }

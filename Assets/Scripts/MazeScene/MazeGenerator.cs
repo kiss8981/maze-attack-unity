@@ -42,14 +42,14 @@ public class MazeGenerator : MonoBehaviour
         _disjointSet = new DisjointSet(disjointSetSize);
     }
 
-    public int GetStartBlockNumber()
+    public Block GetStartBlockNumber()
     {
-        return _blocks[0, 0].BlockNumber;
+        return _blocks[0, 0];
     }
 
-    public int GetGoalBlockNumber()
+    public Block GetGoalBlockNumber()
     {
-        return _blocks[BlockSize.x - 1, BlockSize.y - 1].BlockNumber;
+        return _blocks[BlockSize.x - 1, BlockSize.y - 1];
     }
 
     private void GenerateMaze()
