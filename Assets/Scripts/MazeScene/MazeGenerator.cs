@@ -42,14 +42,14 @@ public class MazeGenerator : MonoBehaviour
         _disjointSet = new DisjointSet(disjointSetSize);
     }
 
-    public Block GetStartBlockNumber()
+    public Vector2 getStartBlockNumber()
     {
-        return _blocks[0, 0];
+        return new Vector2(0, 0);
     }
 
-    public Block GetGoalBlockNumber()
+    public Vector2 getEndBlockNumber()
     {
-        return _blocks[BlockSize.x - 1, BlockSize.y - 1];
+        return new Vector2(BlockSize.x - 1, BlockSize.y - 1);
     }
 
     private void GenerateMaze()
@@ -293,6 +293,11 @@ public class MazeGenerator : MonoBehaviour
                 Instantiate(wallPrefab, wallPosition, Quaternion.identity, myTransform);
             }
         }
+    }
+
+    public Transform GetMazeTransform()
+    {
+        return transform;
     }
 
     private void OnDrawGizmos()

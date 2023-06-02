@@ -5,7 +5,6 @@ public class MazeController : MonoBehaviour
 {
     [SerializeField]
     private MazeGenerator mazeGenerator;
-
     void Start()
     {
         MazeGenerate();
@@ -29,9 +28,9 @@ public class MazeController : MonoBehaviour
     void SetPlayerPosition()
     {
         var player = GameObject.FindGameObjectWithTag("Player");
-        Block startBlock = mazeGenerator.GetStartBlockNumber();
+        Vector2 startBlock = mazeGenerator.getStartBlockNumber();
         Vector3 mazePosition = mazeGenerator.transform.position;
-
-        player.transform.position = startBlock.GetPosition(mazePosition, mazeGenerator.mazeSize);
+        var mazeHalfSize = new Vector3(mazeGenerator.mazeSize.x, mazeGenerator.mazeSize.y, 0) / 2;
+        player.transform.position = new Vector3(1, 1, 0) - mazeHalfSize + mazeGenerator.GetMazeTransform().position;
     }
 }
