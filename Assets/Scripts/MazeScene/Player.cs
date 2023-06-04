@@ -10,6 +10,11 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        MoveMent();
+    }
+
+    private void MoveMent()
+    {
         if (Input.GetKey(KeyCode.D))
         {
             transform.position += Vector3.right * moveSpeed * Time.deltaTime;
@@ -25,6 +30,15 @@ public class Player : MonoBehaviour
         else if (Input.GetKey(KeyCode.S))
         {
             transform.position += Vector3.up * -moveSpeed * Time.deltaTime;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+
+        if (collision.gameObject.tag == "Goal")
+        {
+            Debug.Log("Goal");
         }
     }
 }
