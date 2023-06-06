@@ -4,13 +4,15 @@ using System.Collections;
 public class MazeController : MonoBehaviour
 {
     [SerializeField]
+    private GameObject GoalObject;
     private MazeGenerator mazeGenerator;
 
-    [SerializeField]
-    private GameObject GoalObject;
+    private Player player;
 
     void Start()
     {
+        player = GameObject.Find("Player").GetComponent<Player>();
+        mazeGenerator = GameObject.Find("MazeGenerator").GetComponent<MazeGenerator>();
         GenerateMaze();
     }
 
@@ -20,8 +22,14 @@ public class MazeController : MonoBehaviour
         int width = (level * 2) + 11 % 2 == 0 ? (level * 2) + 10 : (level * 2) + 11;
         int height = (level * 2) + 11 % 2 == 0 ? (level * 2) + 10 : (level * 2) + 11;
         mazeGenerator.MazeGenerate(width, height);
+        GameStart();
+    }
+
+    void GameStart()
+    {
         SetPlayerPosition();
         GenerateGoalObject();
+        player.StartGame();
     }
 
     void SetPlayerPosition()
