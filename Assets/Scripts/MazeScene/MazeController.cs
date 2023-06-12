@@ -5,7 +5,11 @@ public class MazeController : MonoBehaviour
 {
     [SerializeField]
     private GameObject GoalObject;
+
+    [SerializeField]
+    private GameObject MonsterObject;
     private MazeGenerator mazeGenerator;
+    private int monsterCount = 0;
 
     private Player player;
 
@@ -21,6 +25,7 @@ public class MazeController : MonoBehaviour
         int level = PlayerPrefs.GetInt("Level", 1);
         int width = (level * 2) + 11 % 2 == 0 ? (level * 2) + 10 : (level * 2) + 11;
         int height = (level * 2) + 11 % 2 == 0 ? (level * 2) + 10 : (level * 2) + 11;
+        monsterCount = level * 2 + 1;
         mazeGenerator.MazeGenerate(width, height);
         GameStart();
     }
@@ -29,6 +34,7 @@ public class MazeController : MonoBehaviour
     {
         SetPlayerPosition();
         GenerateGoalObject();
+        GenerateMonsterObject();
         player.StartGame();
     }
 
@@ -43,6 +49,28 @@ public class MazeController : MonoBehaviour
             + mazeGenerator.transform.position;
     }
 
+    void GenerateMonsterObject()
+    {
+        bool[,] randomArray = GetRandomArray(mazeGenerator.mazeSize.x, mazeGenerator.mazeSize.y);
+
+        for (int x = 0; x < mazeGenerator.mazeSize.x; x++)
+        {
+            for (int y = 0; y < mazeGenerator.mazeSize.y; y++)
+            {
+                if (!mazeGenerator.existWalls[x, y] || !randomArray[x, y] || monsterCount <= 0)
+                    continue;
+
+                Vector3 mazeHalfSize =
+                    new Vector3(mazeGenerator.mazeSize.x, mazeGenerator.mazeSize.y, 0) / 2;
+                Vector3 monsterPosition = new Vector3(x, y, 0) - mazeHalfSize + transform.position;
+
+                monsterCount--;
+
+                Instantiate(MonsterObject, monsterPosition, Quaternion.identity, transform);
+            }
+        }
+    }
+
     void GenerateGoalObject()
     {
         Vector3 mazeHalfSize =
@@ -55,5 +83,20 @@ public class MazeController : MonoBehaviour
             Quaternion.identity
         );
         Goal.name = "Goal";
+    }
+
+    public bool[,] GetRandomArray(int width, int height)
+    {
+        bool[,] randomArray = new bool[width, height];
+
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                randomArray[i, j] = (Random.value > 0.97f);
+            }
+        }
+
+        return randomArray;
     }
 }

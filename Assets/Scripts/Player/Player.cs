@@ -6,6 +6,8 @@ public class Player : MonoBehaviour
 {
     public int maxHeart = 3;
     public float moveSpeed = 4;
+    public GameObject projectilePrefab;
+    public float cooldownTime = 1f;
 
     [HideInInspector]
     public float time = 0.0f;
@@ -15,6 +17,7 @@ public class Player : MonoBehaviour
 
     [HideInInspector]
     public int heart = 3;
+    private float cooldownTimer = 0f;
 
     void Start()
     {
@@ -24,6 +27,17 @@ public class Player : MonoBehaviour
     void Update()
     {
         MoveMent();
+
+        if (cooldownTimer > 0f)
+        {
+            cooldownTimer -= Time.deltaTime;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Mouse0) && cooldownTimer <= 0f)
+        {
+            LaunchProjectile();
+        }
+
         if (startGame)
         {
             AddTimer();
@@ -63,12 +77,10 @@ public class Player : MonoBehaviour
         if (heart > 0)
         {
             heart -= 1;
-            Debug.Log("TakeDamage");
         }
         else
         {
             EndGame();
-            // UnityEngine.SceneManagement.SceneManager.LoadScene("GameOverScene");
         }
     }
 
@@ -80,6 +92,7 @@ public class Player : MonoBehaviour
     public void EndGame()
     {
         startGame = false;
+        // UnityEngine.SceneManagement.SceneManager.LoadScene("GameOverScene");
     }
 
     public void AddTimer()
@@ -87,8 +100,35 @@ public class Player : MonoBehaviour
         time += Time.deltaTime;
     }
 
-    public float GetTime()
+    private void OnCollisionEnter2D(Collision2D other)
     {
-        return time;
+        if (other.gameObject.CompareTag("Monster"))
+        {
+            TakeDamage();
+        }
+    }
+
+    private void LaunchProjectile()
+    {
+        Vector3 mousePosition = Input.mousePosition;
+        mousePosition.z = 10f; // Distance from the camera
+
+        Vector3 launchDirection =
+            Camera.main.ScreenToWorldPoint(mousePosition) - transform.position;
+        launchDirection.Normalize();
+
+        Vector3 projectilePosition = transform.position + launchDirection * 0.5f;
+
+        GameObject projectile = Instantiate(
+            projectilePrefab,
+            projectilePosition,
+            Quaternion.identity
+        );
+        projectile.transform.rotation = Quaternion.LookRotation(Vector3.forward, launchDirection);
+
+        Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
+        rb.AddForce(launchDirection * 10f, ForceMode2D.Impulse);
+
+        cooldownTimer = cooldownTime;
     }
 }

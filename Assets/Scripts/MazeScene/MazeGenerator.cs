@@ -9,7 +9,9 @@ public class MazeGenerator : MonoBehaviour
     private Vector2Int BlockSize => mazeSize / 2;
 
     private Block[,] blocks;
-    private bool[,] existWalls;
+
+    [HideInInspector]
+    public bool[,] existWalls;
     private DisjointSet disjointSet;
     private readonly Dictionary<int, List<int>> _lastRowBlocks = new Dictionary<int, List<int>>();
 
