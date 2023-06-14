@@ -116,6 +116,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHeart: 3
   moveSpeed: 4
+  target: {fileID: 3029768713273728448, guid: 0a994c595f3dd4764975f57deb150886, type: 3}
   time: 0
   startGame: 0
   heart: 3

@@ -6,6 +6,7 @@ public class Monster : MonoBehaviour
 {
     public int maxHeart = 3;
     public float moveSpeed = 4;
+    public GameObject target;
 
     [HideInInspector]
     public float time = 0.0f;
@@ -23,9 +24,10 @@ public class Monster : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update() {
-
-     }
+    void Update()
+    {
+        Movement();
+    }
 
     public void TakeDamage(int damage)
     {
@@ -39,9 +41,21 @@ public class Monster : MonoBehaviour
         }
     }
 
-    public void Movement (Vector3 playerPosition)
+    public void Movement()
     {
-        Vector3 direction = playerPosition - transform.position;
-        transform.position += direction.normalized * moveSpeed * Time.deltaTime;
+        Vector2 direction = target.transform.position - transform.position; // 플레이어와 AI 사이의 방향 벡터 계산
+        float distance = direction.magnitude; // 플레이어와 AI 사이의 거리 계산
+
+        if (distance > 1f) // 일정 거리 이상일 때만 이동
+        {
+            direction.Normalize(); // 방향 벡터 정규화
+            Vector2 movement = direction * moveSpeed * Time.deltaTime; // 이동 벡터 계산
+
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, movement.magnitude); // AI와 이동 벡터 사이에 충돌이 있는지 체크
+            if (hit.collider == null || hit.collider.CompareTag("Player")) // 충돌이 없거나 플레이어와 충돌한 경우에만 이동
+            {
+                transform.Translate(movement); // AI 이동
+            }
+        }
     }
 }
