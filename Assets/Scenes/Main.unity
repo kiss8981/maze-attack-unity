@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 428249158}
   - component: {fileID: 428249157}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: Title
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -356,7 +356,7 @@ GameObject:
   - component: {fileID: 641664950}
   - component: {fileID: 641664951}
   m_Layer: 0
-  m_Name: MainSceneController
+  m_Name: SceneManger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -386,7 +386,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 641664948}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 17f4537f179cdc841bd84418e2a31a4a, type: 3}
+  m_Script: {fileID: 11500000, guid: f5310dd0242877f47a6721622065b060, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &652791581
@@ -813,9 +813,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: MainButton, Assembly-CSharp
-        m_MethodName: onQuitButtonClick
+      - m_Target: {fileID: 641664951}
+        m_TargetAssemblyTypeName: SceneManager, Assembly-CSharp
+        m_MethodName: quitGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

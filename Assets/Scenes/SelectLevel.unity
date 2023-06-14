@@ -1232,7 +1232,7 @@ GameObject:
   - component: {fileID: 1405880261}
   - component: {fileID: 1405880262}
   m_Layer: 0
-  m_Name: LevelSceneController
+  m_Name: SceneManger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1262,7 +1262,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1405880260}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d9f8d105645aa24487edd47ce6d57b1, type: 3}
+  m_Script: {fileID: 11500000, guid: 0da6dde5fa9352b4fa731fdc1c3933de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   firstLevelBtn: {fileID: 286036333}
@@ -1731,7 +1731,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1405880262}
-        m_TargetAssemblyTypeName: SelectLevelController, Assembly-CSharp
+        m_TargetAssemblyTypeName: SelectSceneManager, Assembly-CSharp
         m_MethodName: OnClickNextPage
         m_Mode: 1
         m_Arguments:
@@ -1741,7 +1741,7 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
-        m_CallState: 2
+        m_CallState: 1
 --- !u!114 &1689996775
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1865,7 +1865,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1405880262}
-        m_TargetAssemblyTypeName: SelectLevelController, Assembly-CSharp
+        m_TargetAssemblyTypeName: SelectSceneManager, Assembly-CSharp
         m_MethodName: OnClickLevelButton
         m_Mode: 3
         m_Arguments:
@@ -1875,7 +1875,7 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
-        m_CallState: 2
+        m_CallState: 1
 --- !u!114 &1873774425
 MonoBehaviour:
   m_ObjectHideFlags: 0
