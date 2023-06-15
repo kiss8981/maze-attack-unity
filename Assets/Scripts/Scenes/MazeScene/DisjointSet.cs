@@ -12,7 +12,6 @@ public class DisjointSet
             Parents[i] = i;
     }
 
-    // 경로 압축
     public int Find(int x)
     {
         if (x == Parents[x])
@@ -21,7 +20,6 @@ public class DisjointSet
         return Parents[x] = Find(Parents[x]);
     }
 
-    // 합집합
     public void Merge(int a, int b)
     {
         a = Find(a);

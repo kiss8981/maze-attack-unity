@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -87,10 +86,7 @@ public class MazeGenerator : MonoBehaviour
         for (int x = 0; x < BlockSize.x; x++)
         {
             int blockNumber = blocks[x, row].BlockNumber;
-            Debug.Log($"blockNumber: {blockNumber}");
-
             int parentNumber = disjointSet.Find(blockNumber);
-            Debug.Log($"parentNumber: {parentNumber}");
 
             if (!lastRowBlocks.ContainsKey(parentNumber))
             {

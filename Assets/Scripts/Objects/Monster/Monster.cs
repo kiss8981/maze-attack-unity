@@ -20,19 +20,10 @@ public class Monster : MonoBehaviour
     public float detectionRadius = 5f;
 
     [HideInInspector]
-    public float time = 0.0f;
-
-    [HideInInspector]
-    public bool startGame = false;
-
-    [HideInInspector]
     public int heart = 3;
     private Transform target;
-    private Vector3 previousPosition;
     private Rigidbody2D rb;
-    private bool isColliding = false;
 
-    // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -45,17 +36,9 @@ public class Monster : MonoBehaviour
         heart = maxHeart;
     }
 
-    private void FixedUpdate()
-    {
-        isColliding = false;
-    }
-
-    // Update is called once per frame
     void Update()
     {
         Movement();
-
-        previousPosition = transform.position;
     }
 
     private void Movement()
@@ -90,16 +73,6 @@ public class Monster : MonoBehaviour
         {
             GameObject.Find("Player").GetComponent<Player>().AddKillCount();
             Destroy(this.gameObject);
-        }
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Wall"))
-        {
-            isColliding = true;
-            Vector2 normal = collision.GetContact(0).normal;
-            rb.velocity = Vector2.Reflect(rb.velocity, normal).normalized * moveSpeed;
         }
     }
 }
